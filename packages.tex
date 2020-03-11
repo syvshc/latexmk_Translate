@@ -1,0 +1,22 @@
+\usepackage{fancyvrb}
+\RecustomVerbatimEnvironment
+{Verbatim}{Verbatim}
+{gobble=6, numbers=left, frame=lines}
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{metalogo}
+\usepackage{mdwlist}
+\usepackage[a4paper,left=2.5cm,right=2.5cm,top=2.5cm,bottom=2cm]{geometry} %边距
+\newtheoremstyle{normal}% name
+{3pt}% Space above
+{3pt}% Space below
+{}% Body font
+{2\ccwd}% Indent amount
+{\bfseries}% Theorem head font
+{}% Punctuation after theorem head
+{1\ccwd}% Space after theorem head
+{}% Theorem head spec (can be left empty, meaning `normal' )
+\theoremstyle{normal}
+\newtheorem{Remark}{注}[section]
+\renewcommand{\emph}[1]{\textbf{#1}}

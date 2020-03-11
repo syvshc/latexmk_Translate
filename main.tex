@@ -1,0 +1,125 @@
+\documentclass{ctexart}
+\input{packages.tex}
+\begin{document}
+\DefineShortVerb{\|}
+\section{简介}
+    |latexmk| 是一个自动编译 \LaTeX{} 的一个工具, 最简单的命令就是直接在 |latexmk| 的后面加上要编译的文档的源文件的文件名, 比如
+    \begin{Verbatim}
+        latexmk foo(.tex)
+    \end{Verbatim}
+    |latexmk|默认的输出是 |.dvi| 文件.
+
+    |latexmk| 在合适的预览器下也是可以连续运行的. 如果发现某一个源文件被修改了 \LaTeX{}, 程序(或者其他的程序)会再次运行, 然后在预览器中也会持续地更新, 比如在 |Windows| 下的 |SumatraPDF|.
+
+    |latexmk| 通过检查 |.log| 文件来决定谁是源文件. 当 |latexmk| 运行的时候, 它会检查源文件的属性, 一旦某个文件在上一次的编译中被改动了, 那它会再次运行一次. 通常地,  |latexmk| 会运行足够多的次数来处理交叉引用. 如果有必要的话, |latexmk| 还会运行 |bibtex|, |biber|, 以及(或) |makeindex|. |latexmk| 是可以高度定制的, 包括命令行还是配置文件.
+
+\section{\texttt{latexmk}在命令行中的选项和参数}
+    如果要命令行里调用 |latexmk| 的话, 通用格式如下
+    \begin{Verbatim}
+        latexmk [options] [file]
+    \end{Verbatim}
+    所有的选项都是可以通过一个或者两个 |-| 来加载, 比如 |latemk -help| 或者 |latexmk --help|.
+    \begin{Remark}
+        \emph{除了下面列出的选项以外}, |latexmk| 还可以识别绝大多数 \LaTeX, pdf\LaTeX\ (以及与它们相关的) 可以在 \TeX\ Live 以及 MiK\TeX\ 中执行的命令, |latexmk| 也可以通过某些命令来实现一些神奇的东西. 可以通过运行
+    \begin{Verbatim}
+        latexmk -showextraoptions
+    \end{Verbatim}
+        来查看一些可以被 |latexmk| 识别的选项.
+    \end{Remark}
+    \begin{Remark}
+        在这个文档里, 我们通常使用的是 pdf\LaTeX. 而一些使用 \LuaLaTeX\ 和 \XeLaTeX\ 的用户需要从阅读中体会到 |latexmk| 的关键点, 因为这些命令与 pdf\LaTeX\ 很相似, 比如它们都可以生成 |*.pdf| 文件, 所以当下文只提到 pdf\LaTeX 的时候, 就说明这些命令可以同样地作用在 \XeLaTeX, \LuaLaTeX 以及其他相似的程序上, 而且如果你想使用任何其他的程序, 可以很容易地通过配置 |latexmk| 来实现, 看下面关于 |-pdflua|, |-pdfxe|, |-lualatex|, |-xelatex| 的说明就好了. 现阶段的 |latexmk| 并不会自动去选择编译所用的程序.
+    \end{Remark}
+\subsection{选项和参数的定义}
+    \begin{description}
+        \item[file] 可以指定一个或多个文件. 如果不指定文件, |latexmk| 会默认地从当前的工作路径中选取所有以 |.tex| 为扩展名的文件. 如果不指定贩卖扩展名, 和 \LaTeX 一样, 会自动添加上 |.tex| 扩展名, 也就是当你使用
+    \begin{Verbatim}
+        latexmk foo
+    \end{Verbatim} 
+        的时候, |latexmk| 会选择 |foo.tex|.
+
+        在文件名可用的字符上有着严格的限制, 有一些字符是被 \LaTeX 禁止使用的, 或者会导致错误, 这些字符是: \texttt{\$}, \texttt{\%}, |\|, |~|, 双引号, 以及一些控制字符, 比如 |null|, |tab|, |form feed|, |carriage return|, |line feed| 和 |delete|. 此外 |&| 不能作为文件名的第一个字符. 
+
+        如果在命令行中被指定的文件名中出现任何上述字符, |latexmk| 会给出一个 |fatal error|. \emph{但是}, 在检测非法字符之前, |latexmk| 会从文件名移除配对的双引号. 这和 \LaTeX 等等的处理方式一样, 而会处理一些在命令行中因为错误添加引号而产生的错误. \emph{此外}, 在 Mircosoft Windows 下, 反斜杠 |\| 是路径中的分隔符, 所以 |latexmk| 将它替换成一个斜杠 |/|, 这个符号在 Windows 下也是一个合法的路径分隔符, 同时也是 \LaTeX 可以接受的符号.\footnote{原文为 so \texttt{latexmk} replaces it by a backward slash "/", which is also a legal derectory separator in Windows, and is accepted by latex etc.}
+
+        \item[\texttt{-auxdir=FOO} 或 \texttt{-aux-directory=FOO}]~
+        
+        设置存放 (pdf)\LaTeX 产生的辅助文件 ( |.aux|, |.log|等等 ) 的文件夹. 这个命令使用的是 (pdf)\LaTeX 中的 |-aux-directory| 选项来实现, 而现在这个功能\emph{只能}通过 MiK\TeX 版本的 (pdf)\LaTeX 来实现.
+
+        参考 |-outdir|/|-output-directory| 选项, 以及 |latexmk| 中 \verb|$aux_dir|, \verb|$out_dir|, \verb|$search_|
+        |path_separator| 的变量(configuration variables). 特别地, 看一下 \verb|$out_dir| 来了解在复杂情况下什么样子的文件夹名是可用的.
+
+        如果你也使用了 |-cd| 选项, 而且指定的辅助文件输出文件夹是一个相关的路径, 那么这个路径被认为成与文档文件夹相关.
+        
+        \item[\texttt{-bibtex}] 当源文件使用了 |.bbl| 文件作为参考文献, 运行 |bibtex| 或者 |biber| 来再生成 |.bbl| 文件.
+        
+        这个功能也可以通过在配置文件里设置 \verb|$bibtex_use| 这个变量的值为 |2| 来实现.
+
+        \item[\texttt{-bibtex-}]~
+        
+        不运行 |bibtex| 或者 |biber|. 同时将 |.bbl| 看成珍贵的(precious), 比如, 在一个清理选项中不删除它们.
+        
+        这个选项的一个常见的使用场景是当你的文档来自于一个外部的源, 已经有一个 |.bbl| 文件, 但是用户并没有确认过 |.bib| 文件是否可用, 这时候你就要使用 |-bibtex-| 这个命令来阻止 |latexmk| 运行 |bibtex| 或者 |biber| 来覆盖已有的 |.bbl| 文件.
+
+        这个功能也可以通过在配置文件里设置 \verb|$bibtex_use| 这个变量的值为 |0| 来实现.
+
+        \item[\texttt{-bibtex-cond}]~
+        
+        当源程序使用 |.bbl| 文件作为参考文献时, 运行 |bibtex| 或 |biber| 来更新 |.bbl| 文件, \emph{仅当相关的\texttt{bib}文件存在}. 因此当 |.bib| 文件不可用时, |bibtex| 或 |biber| 将不会运行, 防止覆盖 |.bbl| 文件. 同时将 |.bbl| 看成珍贵的, 比如, 在一个清理选项中不删除它们.
+
+        这是缺省的设置, 可以通过在配置文件里设置 \verb|$bibtex_use| 这个变量的值为 |1| 来实现.
+
+        使用这个设置的原因一般是当包含在文档中的 |.bbl| 文件是可用的, 但是 |.bib| 文件却不可用. 比如一个作者在投一个科学期刊时提交了 |.tex| 和 |.bbl|, 却没有提交 |.bib|. 在这种情况下, 运行 |bibtex| 或者 |biber| 文件是不起作用的, 而且还会将这个 |.bbl| 文件看作用户的源文件, 而不是一个在需要的时候就可以(被程序自动)重写的一个文件.
+
+        \begin{Remark}
+            下面这种情况是存在的: 当 |.bib| 文件确实存在, 而且 |bibtex| 或 |biber| 程序找到了它, 但是|latexmk| 还是认为 |.bib| 是不存在的. 出现这种状况的可能是因为 |.bib| 不在当前文件夹下, 而在一些需要搜索的文件夹中, 但是 |latexmk| 和 |bibtex| 或者 |biber| 搜索的路径却不一样. 但是在现代的 \TeX 和相关的程序下这种问题不应该出现, 因为 |latexmk| 使用 |kpsewhich| 程序来做搜索, 而 |kpsewhich| 应该有和 |bibtex| 或者 |biber| 相同的 搜索路径. 如果这种情况出现, 在调用 |latexmk| 时还是用 |-bibtex| 选项吧.
+        \end{Remark}
+
+        另外当文档使用 |biber| 而不用 |bibtex| 时这个值不会正确地运行. 
+
+        \item[\texttt{-bibtex-cond1}]~
+        
+        与 |-bibtex-cond| 相同\footnote{原文是 The same as -bibtex-cond1 ... }, 但是在这个选项下仅当一个或多个 |.bib| 文件不存在时 |.bbl| 才会被看做珍贵的. 
+        
+        也就是说, 当全部的 |.bib| 文件存在时, |bibtex| 或者 |biber| 会运行来生成 |.bbl| 文件, 因此它也会在清理中删除 |.bbl| 来让 |.bbl| 可以被重建.
+
+        可以通过在配置文件里设置 \verb|$bibtex_use| 这个变量的值为 |1.5| 来实现.
+
+        \item[\texttt{-bm <message>}]~
+        
+        在将 |.dvi| 文件转换为 |postscript| 时在每一页都斜着打印一个标语(banner message).这个 |message| 在命令行里必须是一个单独的参数, 所以在使用空格时要注意将它们用引号括起来.
+
+        当制定 |-bm| 选项的时候, 假定已经使用了 |-ps| 选项.
+
+        \item[\texttt{-bi <intensity>}]~
+        
+        决定标语打印的多黑. |<intensity>| 接受一个 0 到 1 之间的小数为参数, 其中 0 是黑, 1 是白, 缺省值 0.95, 通常来说是正好的, 除非你的墨盒不够了.
+
+        \item[\texttt{-bs <scale>}]~
+        
+        一个小数来决定标语打印的多大. 想要得到标语的正确的缩放值应该要进行实践, 通常来说 |<scale>| 的值应该为 1100 除以标语里的字符数. 缺省值为 220.0, 也就是有标语有 5 个字符时正合适的缩放值.
+
+        \item[\texttt{-command}]~
+        
+        列出 |latexmk| 可用于处理文件的命令, 然后退出.
+
+        \item[\texttt{-c}] 删除所有由 \LaTeX 和 |bibtex| 或者 |biber| 生成的可以再生的文件, 除了 |.dvi|, |postscript| 和 |.pdf|. 会被删除的文件有日志文件(log files), 辅助文件(aux files), |latexmk| 的源文件信息的数据文件(latexmk's database file of source file information), 以及被 |@generated_exts| 变量指定扩展名的文件. 此外, 被 \verb|$clean_ext| 和 |@generated_exts| 指定的文件也会被删除.
+        
+        这个清理是常规 |make| 的替代. 如果你想清理并做一个 |make|, 请查看 |-gg| 选项.
+
+        \emph{对 \texttt{.bbl} 文件的处理}: 如果 \verb|$bibtex_use| 设置为了 |0| 或者 |1|, |.bbl| 文件将始终按不可再生文件处理. 如果 \verb|$bibtex_use| 的值是 |1.5|, |.bbl| 文件在某些情况下视为不可再生: 如果 |.bib| 文件存在, 那么 |.bbl| 文件被视为可再生的, 在清理中会被删除. 但是当 \verb|$bibtex_use| 的值是 |1.5|, 且 |.bib| 文件不存在, 那么 |.bbl| 文件将被处理为不可再生文件, 因此也不会被删除.
+
+        相反地, 如果 \verb|$bibtex_use| 的值是 |2|, |.bbl| 文件总会被视为可再生文件, 并且会在清理中被删除.
+
+        \emph{对自依赖文件的处理\footnote{原文是 files generated by custom dependencies}}: If \verb|$cleanup_includes_cusdep_generated| is nonzero, regeneratable files are considered as including those generated by custom dependencies and are also deleted. Otherwise these files are not deleted.
+        
+        \item[\texttt{-C}] 删除所有由 \LaTeX 和 |bibtex| 或者 |biber| 生成的可以再生的文件, 包括 |.dvi|, |postscript| 和 |.pdf|. 以及被 \verb|$clean_full_ext| 变量指定的文件. 
+        
+        这个清理是常规 |make| 的替代. 如果你想清理并做一个 |make|, 请查看 |-gg| 选项.
+
+        查看 |-c| 选项来确定什么时候 |.bbl| 会被处理为可再生文件. 
+
+        If \verb|$cleanup_includes_cusdep_generated| is nonzero, regeneratable files are considered as including those generated by custom dependencies and are also deleted. Otherwise these files are not deleted.
+
+        \item[\texttt{-CA}] (过时的). 现在与 |-C| 选项等价. 
+    \end{description}
+\end{document}
