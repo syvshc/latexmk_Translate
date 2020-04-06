@@ -259,12 +259,9 @@ TSWLatexianTemp*
 # KBibTeX
 *~[0-9]*
 
-<<<<<<< HEAD
-=======
 # TeXnicCenter
 *.tps
 
->>>>>>> 9523bbd549a31de8cc1be683ab4179def6680cd7
 # auto folder when using emacs and auctex
 ./auto/*
 *.el
@@ -277,3 +274,6 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+
+# local history
+.history
